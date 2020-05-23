@@ -128,7 +128,10 @@ class EmotionGAN():
 
 if __name__ == "__main__":
     print("Loading images")
-    images = data.loadDataset("V:/NicolasKolbenschlag/")[0]
+    try:
+        images = data.loadDataset("V:/NicolasKolbenschlag/")[0]
+    except:
+        images = data.loadDataset()[0]
     print("Images:", images.shape)
     model = EmotionGAN()
     print("Starting training")
