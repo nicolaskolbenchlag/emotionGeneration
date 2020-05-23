@@ -127,9 +127,10 @@ class EmotionGAN():
             data.writeImage(images[i], str(i) + ".jpg")
 
 if __name__ == "__main__":
+    print("Loading images")
     images = data.loadDataset("V:/NicolasKolbenschlag/")[0]
     print("Images:", images.shape)
-
     model = EmotionGAN()
+    print("Starting training")
     model.train(images, epochs=10000)
     model.genImages(100)
