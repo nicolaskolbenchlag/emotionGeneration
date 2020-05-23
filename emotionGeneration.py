@@ -12,8 +12,7 @@ import data
 # Inspiration: https://github.com/llSourcell/Pokemon_GAN
 
 class EmotionGAN():
-    def __init__(self, img_shape):
-        self.img_shape = img_shape
+    def __init__(self):
         self.discriminator = None
         self.generator = None
         self.adversialModel = None
@@ -128,7 +127,7 @@ if __name__ == "__main__":
     images = data.loadDataset()[0]
     print("Images:", images.shape)
 
-    model = EmotionGAN((112, 112))
+    model = EmotionGAN()
     model.train(images, epochs=10000)
     # model.genImages(100)
     # model.getGenerator().summary()
