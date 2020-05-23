@@ -4,7 +4,7 @@ import numpy as np
 
 def loadDataset(path=""):
     labels, images = [], []
-    for labelsFile in os.listdir(path + "AffWild2/annotations/EXPR_Set/Training_Set")[:1]:
+    for labelsFile in os.listdir(path + "AffWild2/annotations/EXPR_Set/Training_Set"):
         with open(path + "AffWild2/annotations/EXPR_Set/Training_Set/" + labelsFile) as file:
             lines = file.readlines()
         labels += [l.strip() for l in lines]
