@@ -120,14 +120,16 @@ class EmotionGAN():
                 adversialLoss = adversialLoss.history["loss"][-1]
                 print("Discriminator:\t{}Adversial:\t{}".format(discriminatorLoss, adversialLoss))
 
-    def genImages(self, samples, save=False):
-        pass
+    def genImages(self, samples):
+        noise = np.random.uniform(-1.0, 1.0, size=[samples, 100])
+        images = self.getGenerator().predict(noise)
+        for i in range(len(images)):
+            data.writeImage(images[i], str(i) + ".jpg")
 
 if __name__ == "__main__":
-    images = data.loadDataset()[0]
+    images = data.loadDataset("V:/NicolasKolbenschlag/")[0]
     print("Images:", images.shape)
 
     model = EmotionGAN()
     model.train(images, epochs=10000)
-    # model.genImages(100)
-    # model.getGenerator().summary()
+    model.genImages(100)
