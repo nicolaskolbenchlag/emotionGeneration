@@ -11,7 +11,7 @@ import data
 # Source: https://github.com/roatienza/Deep-Learning-Experiments/blob/master/Experiments/Tensorflow/GAN/dcgan_mnist.py
 # Inspiration: https://github.com/llSourcell/Pokemon_GAN
 
-class EmotionGAN():
+class EmotionGAN():# TODO rename to EmotionGANRandom and make EmotionGAN producing specific emotions
     def __init__(self):
         self.discriminator = None
         self.generator = None
