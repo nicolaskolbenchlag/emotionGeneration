@@ -118,7 +118,10 @@ class EmotionGAN():# TODO rename to EmotionGANRandom and make EmotionGAN produci
                 noise = np.random.uniform(-1., 1., size=[len(imagesReal), 100])
                 adversialLoss = self.getAdversialModel().fit(noise, adversialY, verbose=0)
                 adversialLoss = adversialLoss.history["loss"][-1]
-                print("Discriminator:\t{}Adversial:\t{}".format(discriminatorLoss, adversialLoss))
+                print("Batch:", str(i + 1))
+                print("Discriminator: {}".format(discriminatorLoss))
+                print("Adversial: {}".format(adversialLoss))
+                print("__________")
 
     def genImages(self, samples):
         noise = np.random.uniform(-1.0, 1.0, size=[samples, 100])
