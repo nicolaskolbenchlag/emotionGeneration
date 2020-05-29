@@ -2,9 +2,10 @@ import imageio
 import os
 import numpy as np
 
-def loadDataset(path=""):
+def loadDataset(countStart=None, countEnd=None, path=""):
     labels, images = [], []
-    for labelsFile in os.listdir(path + "AffWild2/annotations/EXPR_Set/Training_Set"):
+
+    for labelsFile in os.listdir(path + "AffWild2/annotations/EXPR_Set/Training_Set")[countStart : countEnd]:
         with open(path + "AffWild2/annotations/EXPR_Set/Training_Set/" + labelsFile) as file:
             lines = file.readlines()
         #labels += [l.strip() for l in lines]

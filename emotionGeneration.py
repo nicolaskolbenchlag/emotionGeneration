@@ -134,9 +134,13 @@ if __name__ == "__main__":
     #try:
     #    images = data.loadDataset("V:/NicolasKolbenschlag/")[0]
     #except:
-    images = data.loadDataset()[0]
-    print("Images:", images.shape)
+    
     model = EmotionGAN()
     print("Starting training")
-    model.train(images, epochs=10000)
-    model.genImages(100)
+    jump = 10
+    for i in range(0, 228, jump):
+        print("Working on dataset label files {} - {}".format(i, min(jump + i, 228)))
+        images = data.loadDataset(countStart=i, countEnd=i+jump)[0]
+        print("Images:", images.shape)
+        model.train(images, epochs=10000)
+        model.genImages(10)
