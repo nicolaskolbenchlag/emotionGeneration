@@ -3,15 +3,16 @@ GAN for generation of emotional faces
 v.1.: no specific emotions
 Author: Nicolas Kolbenschlag
 '''
+
+import data
 import tensorflow.keras as keras
 import numpy as np
-import data
 
 # GAN in keras: https://towardsdatascience.com/gan-by-example-using-keras-on-tensorflow-backend-1a6d515a60d0
 # Source: https://github.com/roatienza/Deep-Learning-Experiments/blob/master/Experiments/Tensorflow/GAN/dcgan_mnist.py
 # Inspiration: https://github.com/llSourcell/Pokemon_GAN
 
-class EmotionGAN():# TODO rename to EmotionGANRandom and make EmotionGAN producing specific emotions
+class EmotionGANRandom():
     def __init__(self):
         self.discriminator = None
         self.generator = None
@@ -135,7 +136,7 @@ if __name__ == "__main__":
     #    images = data.loadDataset("V:/NicolasKolbenschlag/")[0]
     #except:
     
-    model = EmotionGAN()
+    model = EmotionGANRandom()
     print("Starting training")
     jump = 10
     for i in range(0, 228, jump):
