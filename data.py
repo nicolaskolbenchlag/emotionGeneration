@@ -8,7 +8,6 @@ def loadDataset(countStart=None, countEnd=None, path=""):
     for labelsFile in os.listdir(path + "AffWild2/annotations/EXPR_Set/Training_Set")[countStart : countEnd]:
         with open(path + "AffWild2/annotations/EXPR_Set/Training_Set/" + labelsFile) as file:
             lines = file.readlines()
-        #labels += [l.strip() for l in lines]
         imagesDir = labelsFile.split(".")[0]
         i = 0
         for file in os.listdir(path + "AffWild2/cropped_aligned/cropped_aligned/" + imagesDir):
@@ -19,7 +18,6 @@ def loadDataset(countStart=None, countEnd=None, path=""):
             except:
                 pass
             i += 1
-        # images += [imageio.imread(path + "AffWild2/cropped_aligned/cropped_aligned/" + imagesDir + "/" + file) for file in os.listdir(path + "AffWild2/cropped_aligned/cropped_aligned/" + imagesDir)]
     x, y = np.array(images), np.array(labels)
     return x, y
 
