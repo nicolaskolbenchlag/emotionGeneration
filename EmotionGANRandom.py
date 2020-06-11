@@ -124,19 +124,19 @@ class EmotionGANRandom():
                 print("Adversial: {}".format(adversialLoss))
                 print("__________")
 
-    def genImages(self, samples, progress=""):
+    def genImages(self, samples, progress):
         noise = np.random.uniform(-1.0, 1.0, size=[samples, 100])
         images = self.getGenerator().predict(noise)
         for i in range(len(images)):
-            data.writeImage(images[i], progress + "_" + str(i) + ".jpg", path="generatedImages/")
+            data.writeImage(images[i], str(progress) + "_" + str(i) + ".jpg", path="generatedImages/")
 
 if __name__ == "__main__":
     model = EmotionGANRandom()
     print("Starting training")
-    jump = 5
+    jump = 2
     for i in range(0, 229, jump):
         print("Working on dataset label files {} - {}".format(i, min(jump + i, 228)))
         imagesLoad = data.loadDataset(countStart=i, countEnd=i+jump, path="")[0]
         print("Images:", imagesLoad.shape)
         model.train(imagesLoad, epochs=10000)
-        model.genImages(10, str(i))
+        model.genImages(10, i)
