@@ -8,10 +8,6 @@ import data
 import tensorflow.keras as keras
 import numpy as np
 
-# GAN in keras: https://towardsdatascience.com/gan-by-example-using-keras-on-tensorflow-backend-1a6d515a60d0
-# Source: https://github.com/roatienza/Deep-Learning-Experiments/blob/master/Experiments/Tensorflow/GAN/dcgan_mnist.py
-# Inspiration: https://github.com/llSourcell/Pokemon_GAN
-
 class EmotionGANRandom():
     def __init__(self):
         self.discriminator = None
@@ -133,10 +129,12 @@ class EmotionGANRandom():
 if __name__ == "__main__":
     model = EmotionGANRandom()
     print("Starting training")
-    jump = 2
-    for i in range(0, 229, jump):
+    jump = 1
+    for i_ in range(0, 10, jump):#229
+        i = 0
         print("Working on dataset label files {} - {}".format(i, min(jump + i, 228)))
         imagesLoad = data.loadDataset(countStart=i, countEnd=i+jump, path="")[0]
         print("Images:", imagesLoad.shape)
-        model.train(imagesLoad, epochs=10000)
-        model.genImages(10, i)
+        model.train(imagesLoad, epochs=100)
+        print("Generation images")
+        model.genImages(10, i_)
