@@ -33,32 +33,33 @@ class EmotionGANRandom2():
         self.datasetDir = "AffWild2"
     
     def generateGenerator(self, noiseShape):
+        N = 2
         model = keras.Sequential([
             keras.layers.Input(shape=noiseShape),
-            keras.layers.Conv2DTranspose(filters=512, kernel_size=(4,4), strides=(1,1), padding="valid", data_format="channels_last", kernel_initializer="glorot_uniform"),
+            keras.layers.Conv2DTranspose(filters=512 * N, kernel_size=(4,4), strides=(1,1), padding="valid", data_format="channels_last", kernel_initializer="glorot_uniform"),
             keras.layers.BatchNormalization(momentum=.5),
             keras.layers.LeakyReLU(.2),
 
-            keras.layers.Conv2DTranspose(filters=256, kernel_size=(4,4), strides=(2,2), padding="same", data_format="channels_last", kernel_initializer="glorot_uniform"),
+            keras.layers.Conv2DTranspose(filters=256 * N, kernel_size=(4,4), strides=(2,2), padding="same", data_format="channels_last", kernel_initializer="glorot_uniform"),
             keras.layers.BatchNormalization(momentum=.5),
             keras.layers.LeakyReLU(.2),
 
-            keras.layers.Conv2DTranspose(filters=128, kernel_size=(4,4), strides=(2,2), padding="same", data_format="channels_last", kernel_initializer="glorot_uniform"),
+            keras.layers.Conv2DTranspose(filters=128 * N, kernel_size=(4,4), strides=(2,2), padding="same", data_format="channels_last", kernel_initializer="glorot_uniform"),
             keras.layers.BatchNormalization(momentum=.5),
             keras.layers.LeakyReLU(.2),
 
-            keras.layers.Conv2DTranspose(filters=64, kernel_size=(4,4), strides=(2,2), padding="same", data_format="channels_last", kernel_initializer="glorot_uniform"),
+            keras.layers.Conv2DTranspose(filters=64 * N, kernel_size=(4,4), strides=(2,2), padding="same", data_format="channels_last", kernel_initializer="glorot_uniform"),
             keras.layers.BatchNormalization(momentum=.5),
             keras.layers.LeakyReLU(.2),
 
-            keras.layers.Conv2DTranspose(filters=64, kernel_size=(3,3), strides=(1,1), padding="same", data_format="channels_last", kernel_initializer="glorot_uniform"),
+            keras.layers.Conv2DTranspose(filters=64 * N, kernel_size=(3,3), strides=(1,1), padding="same", data_format="channels_last", kernel_initializer="glorot_uniform"),
             keras.layers.BatchNormalization(momentum=.5),
             keras.layers.LeakyReLU(.2),
 
-            keras.layers.Conv2DTranspose(filters=3, kernel_size=(3,3), strides=(2,2), padding="same", data_format="channels_last", kernel_initializer="glorot_uniform"),
+            keras.layers.Conv2DTranspose(filters=3, kernel_size=(4,4), strides=(2,2), padding="same", data_format="channels_last", kernel_initializer="glorot_uniform"),
             keras.layers.Activation("tanh")
         ])
-        model.compile(loss="binary_crossentropy", optimizer=keras.optimizers.Adam(lr=0.00015, beta_1=0.5), metrics=["accuracy"])
+        model.compile(loss="binary_crossentropy", optimizer=keras.optimizers.Adam(lr=.00015, beta_1=.5), metrics=["accuracy"])
         return model
     
     def generateDiscriminator(self, imageShape):
@@ -82,12 +83,12 @@ class EmotionGANRandom2():
             keras.layers.Flatten(),
             keras.layers.Dense(1, activation="sigmoid")
         ])
-        model.compile(loss="binary_crossentropy", optimizer=keras.optimizers.Adam(lr=0.0002, beta_1=0.5), metrics=["accuracy"])
+        model.compile(loss="binary_crossentropy", optimizer=keras.optimizers.Adam(lr=.0002, beta_1=.5), metrics=["accuracy"])
         return model
     
     def generateAdversial(self):
         model = keras.Sequential([self.generator, self.discriminator])
-        model.compile(loss="binary_crossentropy", optimizer=keras.optimizers.Adam(lr=0.00015, beta_1=0.5), metrics=["accuracy"])
+        model.compile(loss="binary_crossentropy", optimizer=keras.optimizers.Adam(lr=.00015, beta_1=.5), metrics=["accuracy"])
         return model
     
     def fit(self, epochs, batchSize):  
@@ -98,7 +99,7 @@ class EmotionGANRandom2():
             print("Epoch:", epoch)
             startTime = time.time()
             # NOTE Loop over dataset
-            for iBatch in range(0, 100, batchSize):
+            for iBatch in range(0, 200, batchSize):
                 # NOTE load real images
                 realImagesX = self.getSamplesFromDataset(iBatch, iBatch + batchSize)[0]
                 # NOTE generate fake images with generator
@@ -159,7 +160,8 @@ class EmotionGANRandom2():
             fig.axes.get_yaxis().set_visible(False)
         plt.tight_layout()
         plt.savefig(self.imageSaveDir + "/" + fileName, bbox_inches="tight", pad_inches=0)
-        plt.clf()
+        # plt.clf()
+        plt.close()
     
     def loadImage(self, imagesDir, fileName):
         image = PIL.Image.open(self.datasetDir + "/cropped_aligned/cropped_aligned/" + imagesDir + "/" + fileName)
@@ -171,20 +173,22 @@ class EmotionGANRandom2():
     
     def getSamplesFromDataset(self, countStart, countEnd):
         images, lines = [], []
-        countSkippedLabels = 0
+        countSkippedImages = 0
         for labelsFileName in os.listdir(self.datasetDir + "/annotations/EXPR_Set/Training_Set"):
-            with open(self.datasetDir + "/annotations/EXPR_Set/Training_Set/" + labelsFileName) as labelsFile:
-                newLines = labelsFile.readlines()[1:]
-                if countStart > countSkippedLabels + len(newLines):
-                    countSkippedLabels += len(newLines)
-                    continue
-                linesToAdd = newLines[countStart - countSkippedLabels : countStart - countSkippedLabels + countEnd - countStart - len(lines)]
-                lines += linesToAdd
-                imagesDir = labelsFileName.split(".")[0]
-                imageFilesNames = os.listdir(self.datasetDir + "/cropped_aligned/cropped_aligned/" + imagesDir)[countStart - countSkippedLabels : countStart - countSkippedLabels + countEnd - countStart - len(images)]
-                images += [self.loadImage(imagesDir, fileName) for fileName in imageFilesNames]
-                if len(lines) == countEnd - countStart: break
-                countSkippedLabels += len(linesToAdd)
+            imagesDir = labelsFileName.split(".")[0]
+            imageFilesNames = os.listdir(self.datasetDir + "/cropped_aligned/cropped_aligned/" + imagesDir)
+            with open(self.datasetDir + "/annotations/EXPR_Set/Training_Set/" + labelsFileName) as labelsFile: newLines = labelsFile.readlines()[1:]
+            if countStart > countSkippedImages + len(imageFilesNames):
+                countSkippedImages += len(imageFilesNames)
+                continue
+            i1 = max(countStart - countSkippedImages, 0)
+            i2 = max(countStart - countSkippedImages, 0) + countEnd - countStart - len(images)
+            imageFilesNamesToAdd = imageFilesNames[i1 : i2]
+            linesToAdd = newLines[i1 : i1 + len(imageFilesNamesToAdd)]
+            images += [self.loadImage(imagesDir, fileName) for fileName in imageFilesNamesToAdd]
+            lines += linesToAdd
+            if len(images) == countEnd - countStart: break
+            countSkippedImages += len(imageFilesNamesToAdd)
         return np.array(images), np.array(lines)
 
 def plotLosses(losses:dict):
@@ -196,7 +200,7 @@ def plotLosses(losses:dict):
 
 NOISE_SHAPE = (1,1,100)
 EPOCHS = 500
-BATCH_SIZE = 64
+BATCH_SIZE = 256
 # IMAGE_SHAPE = (112,112,3)
 IMAGE_SHAPE = (64,64,3)
 
@@ -204,3 +208,8 @@ if __name__ == "__main__":
     gan = EmotionGANRandom2(NOISE_SHAPE, IMAGE_SHAPE)
     losses = gan.fit(EPOCHS, BATCH_SIZE)
     plotLosses(losses)
+    # gan.generator.summary()
+    
+    # x = gan.getSamplesFromDataset(0, 256)
+    # print(x[0].shape)
+    # print(x[1].shape)
