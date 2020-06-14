@@ -179,7 +179,7 @@ class EmotionGANRandom2():
         for labelsFileName in os.listdir(self.datasetDir + "/annotations/EXPR_Set/Training_Set"):
             imagesDir = labelsFileName.split(".")[0]
             imageFilesNames = os.listdir(self.datasetDir + "/cropped_aligned/cropped_aligned/" + imagesDir)
-            imageFilesNames = [file for file in imageFilesNames if file.split(".")[1] == "jpg"]
+            imageFilesNames = [file for file in imageFilesNames if len(file.split(".")) == 2 and file.split(".")[1] == "jpg"]
             with open(self.datasetDir + "/annotations/EXPR_Set/Training_Set/" + labelsFileName) as labelsFile: newLines = labelsFile.readlines()[1:]
             if countStart > countSkippedImages + len(imageFilesNames):
                 countSkippedImages += len(imageFilesNames)
