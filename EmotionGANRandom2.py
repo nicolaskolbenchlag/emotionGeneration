@@ -99,9 +99,11 @@ class EmotionGANRandom2():
             print("Epoch:", epoch)
             startTime = time.time()
             # NOTE Loop over dataset
-            for iBatch in range(0, 200, batchSize):
+            for iBatch in range(0, 10000000, batchSize):
                 # NOTE load real images
                 realImagesX = self.getSamplesFromDataset(iBatch, iBatch + batchSize)[0]
+                if len(realImagesX) == 0:
+                    break
                 # NOTE generate fake images with generator
                 noise = self.generateNoise(len(realImagesX))
                 fakeImagesX = self.generator.predict(noise)
@@ -177,6 +179,7 @@ class EmotionGANRandom2():
         for labelsFileName in os.listdir(self.datasetDir + "/annotations/EXPR_Set/Training_Set"):
             imagesDir = labelsFileName.split(".")[0]
             imageFilesNames = os.listdir(self.datasetDir + "/cropped_aligned/cropped_aligned/" + imagesDir)
+            imageFilesNames = [file for file in imageFilesNames if file.split(".")[1] == "jpg"]
             with open(self.datasetDir + "/annotations/EXPR_Set/Training_Set/" + labelsFileName) as labelsFile: newLines = labelsFile.readlines()[1:]
             if countStart > countSkippedImages + len(imageFilesNames):
                 countSkippedImages += len(imageFilesNames)
