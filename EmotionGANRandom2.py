@@ -273,8 +273,7 @@ def plotLosses(losses:dict):
 
 NOISE_SHAPE = (1,1,100)
 EPOCHS = 500
-BATCH_SIZE = 128
-# IMAGE_SHAPE = (112,112,3)
+BATCH_SIZE = 512
 IMAGE_SHAPE = (64,64,3)
 
 if __name__ == "__main__":
