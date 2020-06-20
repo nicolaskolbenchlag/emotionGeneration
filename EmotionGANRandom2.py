@@ -30,7 +30,7 @@ class EmotionGANRandom2():
         self.noiseShape = noiseShape
         self.imageShape = imageShape
         self.imageSaveDir = "generatedImages"
-        self.datasetDir = "AffWild2"
+        self.datasetDir = "AffWild2_some_shuffled"
     
     def generateGenerator(self, noiseShape):
         N = 1
@@ -155,15 +155,16 @@ class EmotionGANRandom2():
         averageDiscriminatorRealLoss = deque([0], maxlen=250)
         averageDiscriminatorFakeLoss = deque([0], maxlen=250)
         averageGanLoss = deque([0], maxlen=250)
-        # NOTE load real images
-        allRealImagesX = self.getSamplesFromDataset2()[0]
         print("Images loaded.")
         for epoch in range(epochs):
             print("Epoch:", epoch)
             startTime = time.time()
             # NOTE Loop over dataset
-            for iBatch in range(0, len(allRealImagesX), batchSize):
-                realImagesX = allRealImagesX[iBatch : iBatch + batchSize]
+            for iBatch in range(0, 3000, batchSize):
+                # NOTE load real images
+                realImagesX = self.getSamplesFromDataset3(iBatch, iBatch + batchSize)[0]
+                if len(realImagesX) == 0:
+                    break
                 # NOTE generate fake images with generator
                 noise = self.generateNoise(len(realImagesX))
                 fakeImagesX = self.generator.predict(noise)
@@ -231,6 +232,14 @@ class EmotionGANRandom2():
         image = np.array(image)
         image = normImage(image)
         return image
+
+    def loadImage2(self, fileName):
+        image = PIL.Image.open(self.datasetDir + "/images/" + fileName)
+        image = image.resize(self.imageShape[:-1])
+        image = image.convert("RGB")
+        image = np.array(image)
+        image = normImage(image)
+        return image
     
     def getSamplesFromDataset(self, countStart, countEnd):
         images, lines = [], []
@@ -262,18 +271,25 @@ class EmotionGANRandom2():
             images += [self.loadImage(imageDir, fileName) for fileName in imageFileNames]
             labels += [lines[i] for i in [int(imageFile.split(".jpg")[0]) for imageFile in imageFileNames]]
         return np.array(images), np.array(labels)
+    
+    def getSamplesFromDataset3(self, countStart, countEnd):
+        images, labels = [], []
+        fileNames = os.listdir(self.datasetDir + "/images")[countStart : countEnd]
+        images = [self.loadImage2(file) for file in fileNames]
+        with open(self.datasetDir + "/labels.txt") as file: labels = file.readlines()[countStart : countEnd]
+        return np.array(images), np.array(labels)
 
 def plotLosses(losses:dict):
     for key, value in losses.items():
-        # plt.figure()
+        plt.figure()
         plt.plot(value, label=key)
     plt.ylabel("loss")
     plt.legend()
     plt.show()
 
 NOISE_SHAPE = (1,1,100)
-EPOCHS = 500
-BATCH_SIZE = 512
+EPOCHS = 2
+BATCH_SIZE = 32
 IMAGE_SHAPE = (64,64,3)
 
 if __name__ == "__main__":
@@ -282,6 +298,6 @@ if __name__ == "__main__":
     plotLosses(losses)
     # gan.generator.summary()
     
-    # x = gan.getSamplesFromDataset2()
+    # x = gan.getSamplesFromDataset3(0, 100)
     # print(x[0].shape)
     # print(x[1].shape)
