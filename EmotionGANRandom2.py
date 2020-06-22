@@ -13,6 +13,7 @@ import PIL
 import os
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+import gc
 
 def normImage(img):
     img = (img / 127.5) - 1
@@ -23,10 +24,12 @@ def denormImage(img):
     return img.astype(np.uint8)
 
 class EmotionGANRandom2():
-    def __init__(self, noiseShape, imageShape):
-        self.generator = self.generateGenerator(noiseShape)
-        self.discriminator = self.generateDiscriminator(imageShape)
-        # self.adversial = self.generateAdversial()
+    def __init__(self, noiseShape, imageShape, generator=None, discriminator=None):
+        if not generator: self.generator = self.generateGenerator(noiseShape)
+        else: self.generator = generator
+        if not discriminator: self.discriminator = self.generateDiscriminator(imageShape)
+        else: self.discriminator = discriminator
+        
         self.noiseShape = noiseShape
         self.imageShape = imageShape
         self.imageSaveDir = "generatedImages"
@@ -160,7 +163,7 @@ class EmotionGANRandom2():
             print("Epoch:", epoch)
             startTime = time.time()
             # NOTE Loop over dataset
-            for iBatch in range(0, 3000, batchSize):
+            for iBatch in range(0, 10, batchSize):
                 # NOTE load real images
                 realImagesX = self.getSamplesFromDataset3(iBatch, iBatch + batchSize)[0]
                 if len(realImagesX) == 0:
@@ -182,7 +185,7 @@ class EmotionGANRandom2():
                 # self.generator.trainable = False
                 discriminatorMetricsReal = self.discriminator.train_on_batch(realImagesX, realDataY)
                 discriminatorMetricsFake = self.discriminator.train_on_batch(fakeImagesX, fakeDataY)
-                print("Discriminator: real loss: %f fake loss: %f" % (discriminatorMetricsReal[0], discriminatorMetricsFake[0]))
+                #print("Discriminator: real loss: %f fake loss: %f" % (discriminatorMetricsReal[0], discriminatorMetricsFake[0]))
                 averageDiscriminatorRealLoss.append(discriminatorMetricsReal[0])
                 averageDiscriminatorFakeLoss.append(discriminatorMetricsFake[0])
                 # NOTE train adversial model
@@ -191,8 +194,9 @@ class EmotionGANRandom2():
                 # self.generator.trainable = True
                 # self.discriminator.trainable = False# NOTE on
                 ganMetrics = self.generateAdversial().train_on_batch(ganX, ganY)# TODO get freshly compiled model
-                print("GAN loss: %f" % (ganMetrics[0]))
+                #print("GAN loss: %f" % (ganMetrics[0]))
                 averageGanLoss.append(ganMetrics[0])
+                gc.collect()
             # NOTE finish epoch and log results
             diffTime = int(time.time() - startTime)
             print("Epoch %d completed. Time took: %s secs." % (epoch, diffTime))
@@ -275,7 +279,7 @@ class EmotionGANRandom2():
     def getSamplesFromDataset3(self, countStart, countEnd):
         images, labels = [], []
         fileNames = os.listdir(self.datasetDir + "/images")[countStart : countEnd]
-        images = [self.loadImage2(file) for file in fileNames]
+        images = [self.loadImage2(file) for file in fileNames if len(file.split(".")) == 2 and file.split(".")[1] == "jpg"]
         with open(self.datasetDir + "/labels.txt") as file: labels = file.readlines()[countStart : countEnd]
         return np.array(images), np.array(labels)
 
@@ -289,13 +293,17 @@ def plotLosses(losses:dict):
 
 NOISE_SHAPE = (1,1,100)
 EPOCHS = 2
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 IMAGE_SHAPE = (64,64,3)
 
 if __name__ == "__main__":
     gan = EmotionGANRandom2(NOISE_SHAPE, IMAGE_SHAPE)
+    # gan = EmotionGANRandom2(NOISE_SHAPE, IMAGE_SHAPE, keras.models.load_model("generator"), keras.models.load_model("discriminatr"))
     losses = gan.fit2(EPOCHS, BATCH_SIZE)
-    plotLosses(losses)
+    gan.geerator.save("generator")
+    gan.discriminatr.save("discriminatr")
+    print("Training finished.")
+    # plotLosses(losses)
     # gan.generator.summary()
     
     # x = gan.getSamplesFromDataset3(0, 100)
