@@ -268,7 +268,6 @@ class EmotionGANRandom2():
     
     def getSamplesFromDataset2(self):
         images, labels = [], []
-        countSkippedImages = 0
         for imageDir in os.listdir(self.datasetDir + "/cropped_aligned/cropped_aligned"):
             imageFileNames = os.listdir(self.datasetDir + "/cropped_aligned/cropped_aligned/" + imageDir)
             with open(self.datasetDir + "/annotations/EXPR_Set/Training_Set/" + imageDir + ".txt") as file: lines = file.readlines()[1:]
@@ -300,8 +299,8 @@ if __name__ == "__main__":
     gan = EmotionGANRandom2(NOISE_SHAPE, IMAGE_SHAPE)
     # gan = EmotionGANRandom2(NOISE_SHAPE, IMAGE_SHAPE, keras.models.load_model("generator"), keras.models.load_model("discriminatr"))
     losses = gan.fit2(EPOCHS, BATCH_SIZE)
-    gan.geerator.save("generator")
-    gan.discriminatr.save("discriminatr")
+    gan.generator.save("generator")
+    gan.discriminator.save("discriminatr")
     print("Training finished.")
     # plotLosses(losses)
     # gan.generator.summary()
