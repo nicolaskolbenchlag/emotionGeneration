@@ -163,7 +163,7 @@ class EmotionGANRandom2():
             print("Epoch:", epoch)
             startTime = time.time()
             # NOTE Loop over dataset
-            for iBatch in range(0, 10, batchSize):
+            for iBatch in range(0, 3000, batchSize):
                 # NOTE load real images
                 realImagesX = self.getSamplesFromDataset3(iBatch, iBatch + batchSize)[0]
                 if len(realImagesX) == 0:
@@ -291,7 +291,7 @@ def plotLosses(losses:dict):
     plt.show()
 
 NOISE_SHAPE = (1,1,100)
-EPOCHS = 2
+EPOCHS = 50
 BATCH_SIZE = 64
 IMAGE_SHAPE = (64,64,3)
 
