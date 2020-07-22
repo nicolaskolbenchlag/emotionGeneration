@@ -31,14 +31,14 @@ def wassersteinLoss(y_true, y_pred):
 
 class EmotionGAN():
     def __init__(self, noiseShape, imageShape):
-        self.nClasses = 3
+        self.nClasses = 4
         self.noiseShape = noiseShape
         self.imageShape = imageShape
         self.generator = self.generateGenerator()
         self.criticer = self.generateCriticer()
         self.adversial = self.generateAdversial()
-        self.imageSaveDir = "generatedImages"
-        self.datasetDir = "AffWild2_some_shuffled"
+        self.imageSaveDir = "generatedImages_weather"
+        self.datasetDir = "weather"
     
     def generateGenerator(self):
         cnn = keras.Sequential([
@@ -82,9 +82,48 @@ class EmotionGAN():
             keras.layers.LeakyReLU(),
             keras.layers.Dropout(.3),
             keras.layers.Flatten()
+            # keras.layers.Conv2D(32, 3, padding="same", activation="relu", input_shape=self.imageShape),
+            # keras.layers.LeakyReLU(),
+            # keras.layers.Dropout(.3),
+            # keras.layers.Conv2D(32, 3, padding="same", activation="relu"),
+            # keras.layers.LeakyReLU(),
+            # keras.layers.Dropout(.3),
+            # keras.layers.Conv2D(32, 3, padding="same", activation="relu"),
+            # keras.layers.MaxPool2D(2),
+            # keras.layers.LeakyReLU(),
+            # keras.layers.Dropout(.3),
+            # keras.layers.Conv2D(64, 3, padding="same", activation="relu"),
+            # keras.layers.LeakyReLU(),
+            # keras.layers.Dropout(.3),
+            # keras.layers.Conv2D(64, 3, padding="same", activation="relu"),
+            # keras.layers.LeakyReLU(),
+            # keras.layers.Dropout(.3),
+            # keras.layers.Conv2D(64, 3, padding="same", activation="relu"),
+            # keras.layers.MaxPool2D(2),
+            # keras.layers.LeakyReLU(),
+            # keras.layers.Dropout(.3),
+            # keras.layers.Conv2D(128, 3, padding="same", activation="relu"),
+            # keras.layers.LeakyReLU(),
+            # keras.layers.Dropout(.3),
+            # keras.layers.Conv2D(128, 3, padding="same", activation="relu"),
+            # keras.layers.LeakyReLU(),
+            # keras.layers.Dropout(.3),
+            # keras.layers.Conv2D(128, 3, padding="same", activation="relu"),
+            # keras.layers.MaxPool2D(2),
+            # keras.layers.LeakyReLU(),
+            # keras.layers.Dropout(.3),
+            # keras.layers.Flatten()
         ])
         image = keras.layers.Input(shape=self.imageShape)
         features = cnn(image)
+
+        # fake = keras.layers.Dense(32, activation="relu")(features)
+        # fake = keras.layers.Dropout(.3)(fake)
+
+        # aux = keras.layers.Dense(64, activation="relu")(features)
+        # aux = keras.layers.Dropout(.3)(aux)
+        # aux = keras.layers.Dense(32, activation="relu")(aux)
+        # aux = keras.layers.Dropout(.3)(aux)
 
         fake = keras.layers.Dense(1, activation="linear", name="generation")(features)
         aux = keras.layers.Dense(self.nClasses, activation="softmax", name="auxiliary")(features)
@@ -111,7 +150,7 @@ class EmotionGAN():
             print("Epoch:", epoch)
             startTime = time.time()
             # NOTE Loop over dataset
-            for iBatch in range(0, 1110, batchSize):
+            for iBatch in range(0, 1125, batchSize):
                 # NOTE load real images
                 realImagesX, labels = self.getSamplesFromDataset(iBatch, iBatch + batchSize)
                 if len(realImagesX) == 0: break
@@ -180,21 +219,22 @@ class EmotionGAN():
     
     def getSamplesFromDataset(self, countStart, countEnd):
         images, labels = [], []
-        fileNames = os.listdir(self.datasetDir + "/images3classes")
+        fileNames = os.listdir(self.datasetDir + "/images")
         fileNames = [file for file in fileNames if len(file.split(".")) == 2 and file.split(".")[1] == "jpg"][countStart : countEnd]
         images = [self.loadImage(file) for file in fileNames]# if len(file.split(".")) == 2 and file.split(".")[1] == "jpg"]        
-        with open(self.datasetDir + "/labels_images3classes.txt") as file: labels = file.readlines()[countStart : countEnd]
+        with open(self.datasetDir + "/labels.txt") as file: labels = file.readlines()[countStart : countEnd]
         labels_ = []
         for label_ in labels:
-            label = int(label_)
-            if label == 1:
-                labels_.append(0)
-            elif label == 4:
-                labels_.append(1)
-            elif label == 5:
-                labels_.append(2)
-            else:
-                assert 1==2, "impossible case: " + str(label) + str(type(label))
+            label = int(label_.strip())
+            labels_.append(label)
+            # if label == 1:
+            #     labels_.append(0)
+            # elif label == 4:
+            #     labels_.append(1)
+            # elif label == 5:
+            #     labels_.append(2)
+            # else:
+            #     assert 1==2, "impossible case: " + str(label) + str(type(label))
         labels = labels_
         return np.array(images), np.array(labels)
 
@@ -206,8 +246,8 @@ def plotLosses(losses:dict):
     plt.legend()
     plt.show()
 
-NOISE_SHAPE = 200#100
-EPOCHS = 100
+NOISE_SHAPE = 100
+EPOCHS = 50
 BATCH_SIZE = 64
 IMAGE_SHAPE = (64,64,3)
 
